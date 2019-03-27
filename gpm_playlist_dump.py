@@ -4,22 +4,13 @@ GIT_REPO_BRANCH = 'master'
 
 GOOGLE_USERNAME = ''
 GOOGLE_PASSWORD = ''
-GOOGLE_LOCALE = 'en_NZ'
+GOOGLE_LOCALE = 'en_US'
 GOOGLE_DEVICE_ID = ''
 
 
 GPM_TRACK_FIELDS = [
     'title', 'artist', 'album'
 ]
-
-
-SMTP_USERNAME = GOOGLE_USERNAME
-SMTP_PASSWORD = GOOGLE_PASSWORD
-SMTP_HOSTNAME = "smtp.gmail.com"
-SMTP_PORT = 587
-
-SMTP_TO_ADDR = ''
-SMTP_TO_SUBJECT = "GPM - Playlist Diff"
 
 
 import csv
@@ -30,14 +21,6 @@ from gmusicapi import Mobileclient as GpmClient
 
 from git import Repo as GitRepo
 from git.exc import InvalidGitRepositoryError, NoSuchPathError
-
-from pprint import pprint
-
-from pygments import highlight
-from pygments.lexers import DiffLexer
-from pygments.formatters import HtmlFormatter
-
-from smtplib import SMTP
 
 
 def git_initialise():
@@ -130,15 +113,6 @@ def gpm_resolve_track(entry, cache):
     return None
 
 
-def smtp_authenticate():
-    server = SMTP(SMTP_HOSTNAME, SMTP_PORT)
-    server.ehlo()
-    server.starttls()
-    server.login(GOOGLE_USERNAME, GOOGLE_PASSWORD)
-
-    return server
-
-
 def main():
     # git initialisation
     repository = git_initialise()
@@ -217,40 +191,8 @@ def main():
     if git_changes_made(repository):
         # commit staged playlist changes
         print('Committing to repository... ', end='')
-        #repository.index.commit('Playlist changes')
+        repository.index.commit('Playlist changes')
         print('done!')
-
-        # build pretty diff
-        # pretty_diff = ""
-        # pretty_diff += HtmlFormatter().get_style_defs('.highlight')
-        # pretty_diff += "\n<br />\n".join(
-        #     highlight(
-        #         str(diff),
-        #         DiffLexer(),
-        #         HtmlFormatter()
-        #     ) for diff in diffs
-        # )
-
-        # build SMTP output
-        # body = "\r\n".join([
-        #     "From: %s" % SMTP_USERNAME,
-        #     "To: %s" % SMTP_TO_ADDR,
-        #     "Subject: %s" % SMTP_TO_SUBJECT,
-        #     "MIME-Version: 1.0",
-        #     "Content-Type: text/html",
-        #     "",
-        #     pretty_diff
-        # ])
-
-        # print(body)
-        # print("")
-        # print(diffs)
-        # print(pretty_diff)
-
-        # initialise SMTP mailer
-        # mailer = smtp_authenticate()
-        # mailer.sendmail(SMTP_USERNAME, SMTP_TO_ADDR, body)
-        # mailer.quit()
     else:
         print('No diff to commit.')
         return
